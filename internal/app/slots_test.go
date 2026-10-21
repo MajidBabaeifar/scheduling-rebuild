@@ -116,7 +116,9 @@ func TestSLT_8(t *testing.T) {
 	if contains(e.times(t, et, "UTC", "2026-11-02"), "13:00") {
 		t.Fatal("host attending another booking must be busy")
 	}
-	conf := e.event(t, ann, func(et *EventType) { et.Slug, et.Length, et.RequiresConfirmation, et.PendingBlocksSlot = "conf", 60, true, true })
+	conf := e.event(t, ann, func(et *EventType) {
+		et.Slug, et.Length, et.RequiresConfirmation, et.PendingBlocksSlot = "conf", 60, true, true
+	})
 	p := e.mustBook(t, conf, "2026-11-02T15:00:00Z", "c@x.com")
 	if contains(e.times(t, et, "UTC", "2026-11-02"), "15:00") {
 		t.Fatal("pending with flag blocks")

@@ -149,7 +149,9 @@ func TestEVT_7(t *testing.T) {
 	if got := query(avail).Dates(); !reflect.DeepEqual(got, []string{"2026-10-23", "2026-10-27", "2026-10-28"}) {
 		t.Fatalf("rolling_available: %v", got)
 	}
-	wantCode(t, e.tryEvent(u, func(et *EventType) { et.Slug, et.Window = "w", Window{Kind: "range", StartDate: "2026-10-27", EndDate: "2026-10-26"} }), ErrInvalid)
+	wantCode(t, e.tryEvent(u, func(et *EventType) {
+		et.Slug, et.Window = "w", Window{Kind: "range", StartDate: "2026-10-27", EndDate: "2026-10-26"}
+	}), ErrInvalid)
 }
 
 // EVT-8: save day 5, week 3 → rejected.
@@ -184,7 +186,9 @@ func TestEVT_10(t *testing.T) {
 func TestEVT_11(t *testing.T) {
 	e := newEnv(t)
 	u := e.user(t, "ann", "UTC")
-	on := e.event(t, u, func(et *EventType) { et.Slug, et.Length, et.RequiresConfirmation, et.PendingBlocksSlot = "on", 60, true, true })
+	on := e.event(t, u, func(et *EventType) {
+		et.Slug, et.Length, et.RequiresConfirmation, et.PendingBlocksSlot = "on", 60, true, true
+	})
 	off := e.event(t, u, func(et *EventType) { et.Slug, et.Length, et.RequiresConfirmation = "off", 60, true })
 	e.mustBook(t, off, "2026-11-02T11:00:00Z", "a@x.com")
 	if got := e.times(t, on, "UTC", "2026-11-02"); !contains(got, "11:00") {

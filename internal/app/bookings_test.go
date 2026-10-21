@@ -136,7 +136,9 @@ func TestBKG_5(t *testing.T) {
 	if b.Location.Kind != "video" || b.Location.Value != "http://test/video/"+b.UID {
 		t.Fatalf("%+v", b.Location)
 	}
-	one := e.event(t, u, func(et *EventType) { et.Slug, et.Locations = "one", []Location{{Kind: "link", Value: "https://meet.example/ann"}} })
+	one := e.event(t, u, func(et *EventType) {
+		et.Slug, et.Locations = "one", []Location{{Kind: "link", Value: "https://meet.example/ann"}}
+	})
 	b = e.mustBook(t, one, "2026-11-02T11:00:00Z", "a@x.com")
 	if b.Location.Value != "https://meet.example/ann" {
 		t.Fatalf("%+v", b.Location)
