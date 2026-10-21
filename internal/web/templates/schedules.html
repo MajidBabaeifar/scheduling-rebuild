@@ -1,0 +1,16 @@
+{{define "title"}}Availability{{end}}
+{{define "content"}}
+<h1>Availability</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+{{range .Schedules}}
+<div class="card row">
+  <div style="flex:1"><strong>{{.Name}}</strong> {{if .IsDefault}}<span class="badge">default</span>{{end}}<br>
+    <span class="muted">{{if .TimeZone}}{{.TimeZone}}{{else}}your time zone{{end}} · {{len .Rules}} weekly rules · {{len .Overrides}} overrides</span></div>
+  <a href="/app/schedules/{{.ID}}">Edit</a>
+  {{if not .IsDefault}}<form class="inline" method="post" action="/app/schedules/{{.ID}}/default"><button class="secondary">Make default</button></form>{{end}}
+  <form class="inline" method="post" action="/app/schedules/{{.ID}}/delete"><button class="danger">Delete</button></form>
+</div>
+{{end}}
+<h2>New schedule</h2>
+{{template "schedule_form" (dict "S" nil "Zones" .Zones "Action" "/app/schedules")}}
+{{end}}

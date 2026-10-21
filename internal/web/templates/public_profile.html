@@ -1,0 +1,12 @@
+{{define "title"}}{{.Owner.Name}}{{end}}
+{{define "content"}}
+<div class="row">{{with .Owner.AvatarURL}}<img src="{{.}}" alt="" width="64" height="64" style="border-radius:50%">{{end}}
+<div><h1 style="margin:0">{{.Owner.Name}}</h1>{{with .Owner.Bio}}<p class="muted" style="margin:.2rem 0">{{.}}</p>{{end}}</div></div>
+{{$o := .Owner}}
+{{range .EventTypes}}
+<a class="card" style="display:block;text-decoration:none;color:inherit" href="/{{$o.Username}}/{{.Slug}}">
+  <strong>{{.Title}}</strong> <span class="muted">{{if .Durations}}{{ints .Durations}}{{else}}{{.Length}}{{end}} min</span>
+  {{with .Description}}<div class="muted">{{.}}</div>{{end}}
+</a>
+{{else}}<p class="muted">Nothing to book yet.</p>{{end}}
+{{end}}

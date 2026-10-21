@@ -1,0 +1,46 @@
+{{define "title"}}Bookings{{end}}
+{{define "content"}}
+{{with .Flash}}<p class="error" role="alert">{{.}}</p>{{end}}
+<div class="row"><h1 style="flex:1">Event types</h1><a class="button" href="/app/event-types/new">New event type</a></div>
+{{$u := .User}}
+{{range .EventTypes}}
+<div class="card row">
+  <div style="flex:1"><strong>{{.Title}}</strong> <span class="muted">/{{$u.Username}}/{{.Slug}} · {{if .Durations}}{{ints .Durations}}{{else}}{{.Length}}{{end}} min</span>
+    {{if .Hidden}}<span class="badge">hidden</span>{{end}}{{if .RequiresConfirmation}}<span class="badge">needs confirmation</span>{{end}}</div>
+  <a href="/{{$u.Username}}/{{.Slug}}">Open</a> <a href="/app/event-types/{{.ID}}">Edit</a>
+</div>
+{{else}}<p class="muted">No event types yet.</p>{{end}}
+
+<h2>Upcoming bookings</h2>
+{{template "bookings" (dict "List" .Upcoming "Titles" .Titles "Now" .Now "User" .User)}}
+<h2>Past bookings</h2>
+{{template "bookings" (dict "List" .Past "Titles" .Titles "Now" .Now "User" .User)}}
+{{end}}
+
+{{define "bookings"}}
+{{$titles := .Titles}}{{$now := .Now}}{{$tz := .User.TimeZone}}
+{{range .List}}
+<div class="card">
+  <div class="row"><strong style="flex:1">{{index $titles .EventTypeID}} · {{datetime .Start $tz}}–{{clock .End $tz false}}</strong>{{template "status" .Status}}</div>
+  <div class="muted">{{range $i, $a := .Attendees}}{{if $i}}, {{end}}{{$a.Name}} &lt;{{$a.Email}}&gt;{{if $a.NoShow}} (no-show){{end}}{{end}}
+    {{if .HostNoShow}} · host no-show{{end}} · <a href="/booking/{{.UID}}">{{.UID}}</a></div>
+  {{range .Warnings}}<p class="error">⚠ {{.}}</p>{{end}}
+  {{with .CancelReason}}<div class="muted">Reason: {{.}}</div>{{end}}{{with .RejectReason}}<div class="muted">Rejected: {{.}}</div>{{end}}
+  <div class="row" style="margin-top:.4rem">
+  {{if eq .Status "pending"}}
+    <form class="inline" method="post" action="/app/bookings/{{.UID}}/confirm"><button>Confirm</button></form>
+    <form class="row inline" method="post" action="/app/bookings/{{.UID}}/reject"><input name="reason" placeholder="Reason (optional)" aria-label="Reject reason" style="width:12rem"><button class="danger">Reject</button></form>
+  {{end}}
+  {{if and (or (eq .Status "pending") (eq .Status "accepted")) (not (past .End $now))}}
+    <form class="row inline" method="post" action="/app/bookings/{{.UID}}/cancel"><input name="reason" placeholder="Cancel reason" aria-label="Cancel reason" style="width:12rem"><button class="danger">Cancel</button></form>
+    {{if not (past .Start $now)}}<a class="button secondary" href="/booking/{{.UID}}">Reschedule…</a>{{end}}
+  {{end}}
+  {{if and (eq .Status "accepted") (past .Start $now)}}
+    {{$uid := .UID}}
+    {{range .Attendees}}<form class="inline" method="post" action="/app/bookings/{{$uid}}/no-show"><input type="hidden" name="who" value="{{.Email}}"><input type="hidden" name="value" value="{{not .NoShow}}"><button class="secondary">{{if .NoShow}}Unmark{{else}}Mark{{end}} {{.Name}} no-show</button></form>{{end}}
+    <form class="inline" method="post" action="/app/bookings/{{.UID}}/no-show"><input type="hidden" name="who" value="host"><input type="hidden" name="value" value="{{not .HostNoShow}}"><button class="secondary">{{if .HostNoShow}}Unmark{{else}}Mark{{end}} host no-show</button></form>
+  {{end}}
+  </div>
+</div>
+{{else}}<p class="muted">None.</p>{{end}}
+{{end}}

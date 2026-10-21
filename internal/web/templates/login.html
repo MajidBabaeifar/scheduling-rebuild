@@ -1,0 +1,12 @@
+{{define "title"}}Sign in{{end}}
+{{define "content"}}
+<h1>Sign in</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="/login">
+  <input type="hidden" name="next" value="{{.Next}}">
+  <label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required value="{{.Email}}">
+  <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+  <p><button>Sign in</button></p>
+</form>
+<p class="muted">No account? <a href="/signup">Sign up</a></p>
+{{end}}
