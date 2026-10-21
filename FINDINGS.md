@@ -40,7 +40,7 @@ Code cites `F-n` where the assumption lives. ★ = proposed as a spec fix on Spe
 | F-32 ★ | AUTH-13, PUB | M | No CSRF rule for cookie-authenticated form posts. | SameSite=Lax plus an Origin check on POST. |
 | F-33 ★ | PUB-2 | M | Zone "changeable unless locked": no event-type field locks the zone. | Not built. |
 | F-34 ★ | SLT-8 | A | "Host is attendee" matched how? | Attendee email = host's account email. |
-| F-35 ★ | BKG-11 | M | Confirm/reject link lifetime; does using one void the other; GET or POST? | No expiry; using either voids both; GET shows a page, POST acts (mail scanners prefetch links). |
+| F-35 ★ (with F-28) | BKG-11 | M | Confirm/reject link lifetime; does using one void the other; GET or POST? | No expiry; using either voids both; GET shows a page, POST acts (mail scanners prefetch links). |
 | F-36 | AUTH-5, PUB-1 | M | Unverified users can't publish pages (AUTH-5), so PUB depends on AUTH-5, which the v0.1 scope left out. | Pages publish without verification in this build. |
 | F-37 ★ | SLT-4, SLT-9 | A | "Range start" before or after busy time (and buffers) is removed; this moves slot alignment after a booking. | Free ranges are hours minus busy expanded by both sides' buffers (equivalent to SLT-9), so alignment restarts after each busy block. |
 | F-38 ★ | BKG-13 | A | "In the past": started or ended? | Started. |
