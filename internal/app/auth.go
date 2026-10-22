@@ -130,7 +130,7 @@ func NormalizeEmail(s string) (string, error) {
 	if err != nil || a.Address != s || a.Name != "" {
 		return "", errf(ErrFieldInvalid, "email")
 	}
-	// F-31: "valid" also means a dotted domain (RFC 5322 alone accepts `a@b`).
+	// BKG-4: an addr-spec with a dotted domain (RFC 5322 alone accepts `a@b`).
 	if d := s[strings.LastIndex(s, "@")+1:]; !strings.Contains(d, ".") || strings.HasPrefix(d, ".") || strings.HasSuffix(d, ".") {
 		return "", errf(ErrFieldInvalid, "email")
 	}

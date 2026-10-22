@@ -123,7 +123,7 @@ func TestBKG_4(t *testing.T) {
 	}
 	_, err := e.book(et, "2026-11-02T11:00:00Z", "b@spam.com")
 	wantCode(t, err, ErrFieldInvalid)
-	_, err = e.book(et, "2026-11-02T11:00:00Z", "b@x", "x", "y")
+	_, err = e.book(et, "2026-11-02T11:00:00Z", "b@x", "x", "y") // undotted domain
 	wantCode(t, err, ErrFieldInvalid)
 	e.mustBook(t, et, "2026-11-02T11:00:00Z", "b@x.com", "phone", "+14155550123", "work", "bob@ACME.com")
 }
