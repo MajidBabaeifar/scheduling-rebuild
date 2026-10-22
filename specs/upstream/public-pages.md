@@ -10,8 +10,8 @@ What bookers see: profile, booking flow, confirmation, and managing a booking. N
 
 | ID | Requirement | Verified by |
 |---|---|---|
-| PUB-1 | `/{username}` and `/{team-slug}`: name, avatar, bio, and visible event types (title, durations, description); private teams hide members. | hidden event not listed |
-| PUB-2 | `/{owner}/{event-slug}`: month calendar with available dates, time list for the chosen date in the booker's zone (detected, changeable unless locked), 12/24 h toggle, duration picker when several. | zone changed → times re-rendered |
+| PUB-1 | `/{username}` and `/{team-slug}` (one namespace; route names such as `app`, `api`, `booking`, `login` are reserved and refused as usernames or slugs): name, avatar, bio, and visible event types (title, durations, description); private teams hide members. | hidden event not listed |
+| PUB-2 | `/{owner}/{event-slug}`: month calendar with available dates, time list for the chosen date in the booker's zone (detected, changeable unless [EVT-20](event-types.md) locks it), 12/24 h toggle, duration picker when several. | zone changed → times re-rendered |
 | PUB-3 | `/{user1}+{user2}/{duration}` (dynamic group): collective booking across users who allow it; any user not allowing it → 404. | user disallows → 404 |
 | PUB-4 | Choosing a time places the hold ([SLT-15](slots.md)) and shows the form ([BKG-3](bookings.md)); fields can be prefilled from query parameters with the field name. | `?email=a@b.c` → email prefilled |
 | PUB-5 | Success page `/booking/{uid}`: what, when (booker zone), where, who; add-to-calendar links (Google, Outlook, `.ics`); status shown for pending and awaiting payment. | open uid → details shown |
