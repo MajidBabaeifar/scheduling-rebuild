@@ -110,15 +110,15 @@ func (et *EventType) Validate() error {
 	if !slugRe.MatchString(et.Slug) {
 		return errf(ErrInvalid, "slug: 1-64 of a-z, 0-9, -")
 	}
-	if et.Length < 1 {
-		return errf(ErrInvalid, "length: at least 1 minute")
+	if et.Length < 1 || et.Length > 1440 {
+		return errf(ErrInvalid, "length: 1-1440 minutes")
 	}
 	if len(et.Durations) > 0 {
 		seen, hasLength := map[int]bool{}, false
 		var ds []int
 		for _, d := range et.Durations {
-			if d < 1 {
-				return errf(ErrInvalid, "durations: each at least 1")
+			if d < 1 || d > 1440 {
+				return errf(ErrInvalid, "durations: each 1-1440")
 			}
 			if !seen[d] {
 				seen[d] = true

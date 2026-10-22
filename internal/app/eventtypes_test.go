@@ -19,11 +19,12 @@ func TestEVT_1(t *testing.T) {
 	e := newEnv(t)
 	u := e.user(t, "ann", "UTC")
 	for name, mut := range map[string]func(*EventType){
-		"length 0":  func(et *EventType) { et.Length = 0 },
-		"no title":  func(et *EventType) { et.Title = " " },
-		"long":      func(et *EventType) { et.Title = strings.Repeat("x", 201) },
-		"bad slug":  func(et *EventType) { et.Slug = "Intro Call" },
-		"long slug": func(et *EventType) { et.Slug = strings.Repeat("a", 65) },
+		"length 0":    func(et *EventType) { et.Length = 0 },
+		"length 1441": func(et *EventType) { et.Length = 1441 },
+		"no title":    func(et *EventType) { et.Title = " " },
+		"long":        func(et *EventType) { et.Title = strings.Repeat("x", 201) },
+		"bad slug":    func(et *EventType) { et.Slug = "Intro Call" },
+		"long slug":   func(et *EventType) { et.Slug = strings.Repeat("a", 65) },
 	} {
 		if err := e.tryEvent(u, mut); Code(err) != ErrInvalid {
 			t.Errorf("%s: %v", name, err)
@@ -32,6 +33,18 @@ func TestEVT_1(t *testing.T) {
 	et := e.event(t, u, nil)
 	if et.Hidden || et.UserID != u.ID || et.Length != 30 {
 		t.Fatalf("%+v", et)
+	}
+	e.event(t, u, func(et *EventType) { et.Slug, et.Length = "day", 1440 })
+	// position ascending, ties by creation
+	e.event(t, u, func(et *EventType) { et.Slug, et.Position = "first", -1 })
+	e.event(t, u, func(et *EventType) { et.Slug = "tie" })
+	ets, _ := e.EventTypes(ctx, u.ID, false)
+	var order []string
+	for _, x := range ets {
+		order = append(order, x.Slug)
+	}
+	if strings.Join(order, ",") != "first,intro,day,tie" {
+		t.Fatalf("order %v", order)
 	}
 }
 
