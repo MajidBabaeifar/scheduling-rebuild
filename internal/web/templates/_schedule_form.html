@@ -1,0 +1,12 @@
+{{define "schedule_form"}}
+<form method="post" action="{{.Action}}">
+  <label for="name">Name</label><input id="name" name="name" required value="{{with .S}}{{.Name}}{{end}}">
+  <label for="time_zone">Time zone</label>
+  <select id="time_zone" name="time_zone"><option value="">My time zone</option>{{$tz := ""}}{{with .S}}{{$tz = .TimeZone}}{{end}}{{if and $tz (not (has .Zones $tz))}}<option selected>{{$tz}}</option>{{end}}{{range .Zones}}<option {{if eq . $tz}}selected{{end}}>{{.}}</option>{{end}}</select>
+  <label for="rules">Weekly hours, one per line: <code>days start-end</code>, days 0 = Sunday … 6 = Saturday</label>
+  <textarea id="rules" name="rules" placeholder="1,2,3,4,5 09:00-17:00">{{with .S}}{{rules .Rules}}{{else}}1,2,3,4,5 09:00-17:00{{end}}</textarea>
+  <label for="overrides">Date overrides, one per line: <code>2026-12-24 09:00-12:00</code> or <code>2026-12-25 off</code></label>
+  <textarea id="overrides" name="overrides">{{with .S}}{{overrides .Overrides}}{{end}}</textarea>
+  <p><button>Save</button></p>
+</form>
+{{end}}

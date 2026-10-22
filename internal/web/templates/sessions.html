@@ -1,0 +1,12 @@
+{{define "title"}}Sessions{{end}}
+{{define "content"}}
+<h1>Signed-in sessions</h1>
+{{$cur := .Current}}
+{{range .Sessions}}
+<div class="card row">
+  <div style="flex:1"><strong>{{.UserAgent}}</strong>{{if eq .ID $cur}} <span class="badge">this browser</span>{{end}}<br>
+  <span class="muted">Since {{datetime .CreatedAt "UTC"}} UTC · last seen {{datetime .LastSeenAt "UTC"}} UTC</span></div>
+  <form method="post" action="/app/sessions/{{.ID}}/revoke"><button class="danger">Revoke</button></form>
+</div>
+{{end}}
+{{end}}

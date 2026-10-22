@@ -1,0 +1,18 @@
+{{define "title"}}Time off{{end}}
+{{define "content"}}
+<h1>Time off</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+{{range .List}}
+<div class="card row"><div style="flex:1"><strong>{{.StartDate}} – {{.EndDate}}</strong> · {{.Reason}}{{with .Note}} <span class="muted">({{.}})</span>{{end}}</div>
+<form method="post" action="/app/time-off/{{.ID}}/delete"><button class="danger">Remove</button></form></div>
+{{else}}<p class="muted">None.</p>{{end}}
+<h2>Add time off</h2>
+<form method="post" action="/app/time-off">
+  <div class="grid2"><div><label for="start_date">From</label><input id="start_date" name="start_date" type="date" required></div>
+  <div><label for="end_date">To (inclusive)</label><input id="end_date" name="end_date" type="date" required></div></div>
+  <label for="reason">Reason</label><input id="reason" name="reason" required placeholder="Vacation">
+  <label for="note">Note</label><input id="note" name="note">
+  <label><input type="checkbox" name="note_public"> Show note publicly</label>
+  <p><button>Add</button></p>
+</form>
+{{end}}

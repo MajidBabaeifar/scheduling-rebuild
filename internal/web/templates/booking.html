@@ -1,0 +1,30 @@
+{{define "title"}}{{.ET.Title}} · booking{{end}}
+{{define "content"}}
+{{$b := .B}}
+{{if eq $b.Status "accepted"}}<h1>This meeting is scheduled</h1>
+{{else if eq $b.Status "pending"}}<h1>Request sent</h1><p>{{.Host.Name}} needs to confirm this booking. You'll get an email.</p>
+{{else if eq $b.Status "awaiting_payment"}}<h1>Awaiting payment</h1>
+{{else if $b.Rescheduled}}<h1>This booking was rescheduled</h1>{{with .Next}}<p><a href="/booking/{{.UID}}">See the new time</a></p>{{end}}
+{{else if eq $b.Status "rejected"}}<h1>This booking was declined</h1>{{with $b.RejectReason}}<p>Reason: {{.}}</p>{{end}}
+{{else}}<h1>This booking was cancelled</h1>{{with $b.CancelReason}}<p>Reason: {{.}}</p>{{end}}{{end}}
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<div class="card">
+<dl>
+  <dt>What</dt><dd>{{.ET.Title}} {{template "status" $b.Status}}</dd>
+  <dt>When</dt><dd>{{day $b.Start .TZ}}, {{clock $b.Start .TZ false}}–{{clock $b.End .TZ false}} <span class="muted">({{.TZ}})</span></dd>
+  <dt>Where</dt><dd>{{locationText $b.Location}}</dd>
+  <dt>Who</dt><dd>{{.Host.Name}} (organizer)<br>{{range $b.Attendees}}{{.Name}} &lt;{{.Email}}&gt;<br>{{end}}</dd>
+</dl>
+</div>
+{{if or (eq $b.Status "accepted") (eq $b.Status "pending")}}
+<p class="row">Add to calendar: <a href="{{.GoogleURL}}" rel="noopener" target="_blank">Google</a> <a href="{{.OutlookURL}}" rel="noopener" target="_blank">Outlook</a> <a href="/booking/{{$b.UID}}/ics">.ics</a></p>
+{{end}}
+{{if .CanReschedule}}<p><a class="button secondary" href="{{.RescheduleURL}}">Reschedule</a></p>{{end}}
+{{if .CanCancel}}
+<form method="post" action="/booking/{{$b.UID}}/cancel">
+  <label for="reason">Reason for cancelling{{if .ReasonNeeded}} *{{else}} (optional){{end}}</label>
+  <input id="reason" name="reason" {{if .ReasonNeeded}}required{{end}}>
+  <p><button class="danger">Cancel booking</button></p>
+</form>
+{{end}}
+{{end}}

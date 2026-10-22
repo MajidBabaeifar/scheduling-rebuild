@@ -1,0 +1,38 @@
+{{define "title"}}Confirm · {{.ET.Title}}{{end}}
+{{define "content"}}
+<h1>{{if .Reschedule}}Reschedule{{else}}Book{{end}} {{.ET.Title}}</h1>
+<p><strong>{{day .Start .TZ}}, {{clock .Start .TZ false}}–{{clock .End .TZ false}}</strong> <span class="muted">({{.TZ}}) with {{.Owner.Name}}</span> · <a href="{{.Back}}">change</a></p>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="/{{.Owner.Username}}/{{.ET.Slug}}/book">
+  <input type="hidden" name="start" value="{{rfc3339 .Start}}">
+  <input type="hidden" name="duration" value="{{.Duration}}">
+  <input type="hidden" name="tz" value="{{.TZ}}">
+  {{if .Reschedule}}<input type="hidden" name="reschedule" value="{{.Reschedule}}">{{end}}
+  {{$v := .Values}}{{$et := .ET}}
+  {{range .Fields}}
+    {{$val := $v.Get .Name}}
+    {{if eq .Type "location"}}
+      <fieldset><legend>{{.Label}}</legend>{{range $et.Locations}}<label><input type="radio" name="location" value="{{.Kind}}" required {{if eq $val .Kind}}checked{{end}}> {{locationKind .Kind}}{{if and .Value (ne .Kind "phone_host")}}: {{.Value}}{{end}}</label>{{end}}</fieldset>
+    {{else if eq .Type "textarea"}}
+      <label for="f-{{.Name}}">{{.Label}}{{if .Required}} *{{end}}</label><textarea id="f-{{.Name}}" name="{{.Name}}" {{if .Required}}required{{end}}>{{$val}}</textarea>
+    {{else if or (eq .Type "select")}}
+      <label for="f-{{.Name}}">{{.Label}}{{if .Required}} *{{end}}</label><select id="f-{{.Name}}" name="{{.Name}}" {{if .Required}}required{{end}}><option value=""></option>{{range .Options}}<option {{if eq . $val}}selected{{end}}>{{.}}</option>{{end}}</select>
+    {{else if or (eq .Type "multiselect") (eq .Type "checkbox") (eq .Type "radio")}}
+      {{$f := .}}{{$all := index $v .Name}}
+      <fieldset><legend>{{.Label}}{{if .Required}} *{{end}}</legend>{{range .Options}}<label><input type="{{if eq $f.Type "radio"}}radio{{else}}checkbox{{end}}" name="{{$f.Name}}" value="{{.}}" {{if has $all .}}checked{{end}}> {{.}}</label>{{end}}</fieldset>
+    {{else if eq .Type "boolean"}}
+      <label><input type="checkbox" name="{{.Name}}" value="true" {{if .Required}}required{{end}} {{if $val}}checked{{end}}> {{.Label}}{{if .Required}} *{{end}}</label>
+    {{else if eq .Type "guests"}}
+      <label for="f-guests">{{.Label}} <span class="muted">(emails, comma separated)</span></label><input id="f-guests" name="guests" value="{{join (index $v "guests") ","}}">
+    {{else}}
+      <label for="f-{{.Name}}">{{.Label}}{{if .Required}} *{{end}}</label>
+      <input id="f-{{.Name}}" name="{{.Name}}" value="{{$val}}" {{if .Required}}required{{end}}
+        type="{{if eq .Type "email"}}email{{else if eq .Type "phone"}}tel{{else if eq .Type "url"}}url{{else if eq .Type "number"}}number{{else}}text{{end}}"
+        {{with .MinLength}}minlength="{{.}}"{{end}} {{with .MaxLength}}maxlength="{{.}}"{{end}}
+        {{if eq .Name "email"}}autocomplete="email"{{else if eq .Name "name"}}autocomplete="name"{{end}}>
+    {{end}}
+  {{end}}
+  <p><button>{{if .Reschedule}}Reschedule{{else}}Confirm booking{{end}}</button></p>
+  <p class="muted">This time is held for you for 5 minutes.</p>
+</form>
+{{end}}

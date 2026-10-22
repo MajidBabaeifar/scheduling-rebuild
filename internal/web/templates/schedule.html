@@ -1,0 +1,7 @@
+{{define "title"}}Schedule{{end}}
+{{define "content"}}
+<h1>Edit schedule</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+{{template "schedule_form" (dict "S" .S "Zones" .Zones "Action" (printf "/app/schedules/%d" .S.ID))}}
+<p><a href="/app/schedules">Back</a></p>
+{{end}}

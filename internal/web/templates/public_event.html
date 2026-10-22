@@ -1,0 +1,53 @@
+{{define "title"}}{{.ET.Title}} · {{.Owner.Name}}{{end}}
+{{define "content"}}
+<p class="muted"><a href="/{{.Owner.Username}}">{{.Owner.Name}}</a></p>
+<h1>{{.ET.Title}}</h1>
+{{with .ET.Description}}<p>{{.}}</p>{{end}}
+{{if .Reschedule}}<p class="badge">Rescheduling booking {{.Reschedule}}</p>{{end}}
+<div id="picker">{{template "partial" .}}</div>
+{{if .TZDetect}}
+<script>
+(function(){ var z=Intl.DateTimeFormat().resolvedOptions().timeZone; if (!z || z === {{.TZ}}) return;
+  var u=new URL(location.href); u.searchParams.set('tz', z); location.replace(u); })();
+</script>
+{{end}}
+{{end}}
+
+{{define "partial"}}
+{{$base := printf "/%s/%s" .Owner.Username .ET.Slug}}
+<form class="row" method="get" action="{{$base}}" hx-get="{{$base}}" hx-target="#picker" hx-push-url="true" hx-trigger="change">
+  {{if .Reschedule}}<input type="hidden" name="reschedule" value="{{.Reschedule}}">{{end}}
+  <input type="hidden" name="month" value="{{.MonthKey}}">
+  {{if .Date}}<input type="hidden" name="date" value="{{.Date}}">{{end}}
+  {{range $k, $vs := .Prefill}}{{range $vs}}<input type="hidden" name="{{$k}}" value="{{.}}">{{end}}{{end}}
+  <label for="tz" style="margin:0">Time zone</label>
+  <select id="tz" name="tz" style="width:auto">{{$tz := .TZ}}{{range .Zones}}<option {{if eq . $tz}}selected{{end}}>{{.}}</option>{{end}}</select>
+  {{if gt (len .ET.AllowedDurations) 1}}
+  <label for="duration" style="margin:0">Duration</label>
+  <select id="duration" name="duration" style="width:auto">{{$d := .Duration}}{{range .ET.AllowedDurations}}<option value="{{.}}" {{if eq . $d}}selected{{end}}>{{.}} min</option>{{end}}</select>
+  {{else}}<input type="hidden" name="duration" value="{{.Duration}}"><span class="muted">{{.Duration}} min</span>{{end}}
+  <label style="margin:0"><input type="checkbox" name="h12" value="1" {{if .H12}}checked{{end}}> 12 h</label>
+  <noscript><button>Update</button></noscript>
+</form>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<div class="grid2" style="margin-top:1rem">
+<div>
+  <div class="row"><a href="{{$base}}?month={{.PrevMonth}}&{{.Keep}}" hx-get="{{$base}}?month={{.PrevMonth}}&{{.Keep}}" hx-target="#picker" hx-push-url="true" aria-label="Previous month">‹</a>
+    <strong style="flex:1;text-align:center">{{.Month}}</strong>
+    <a href="{{$base}}?month={{.NextMonth}}&{{.Keep}}" hx-get="{{$base}}?month={{.NextMonth}}&{{.Keep}}" hx-target="#picker" hx-push-url="true" aria-label="Next month">›</a></div>
+  <table class="cal"><thead><tr><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th><th>Su</th></tr></thead><tbody>
+  {{$keep := .Keep}}
+  {{range .Weeks}}<tr>{{range .}}<td>{{if not .InMonth}}<span class="out">{{.Day}}</span>{{else if .Available}}<a {{if .Selected}}class="sel" aria-current="date"{{end}} href="{{$base}}?date={{.Date}}&{{$keep}}" hx-get="{{$base}}?date={{.Date}}&{{$keep}}" hx-target="#picker" hx-push-url="true">{{.Day}}</a>{{else}}<span>{{.Day}}</span>{{end}}</td>{{end}}</tr>{{end}}
+  </tbody></table>
+</div>
+<div>
+  {{if .Date}}
+  <h2 style="margin-top:0">{{.Date}}</h2>
+  <div class="times" id="times">
+  {{$tz := .TZ}}{{$h12 := .H12}}
+  {{range .Times}}<a href="{{$base}}/book?start={{rfc3339 .Start}}&{{$keep}}">{{clock .Start $tz $h12}}</a>{{end}}
+  </div>
+  {{else}}<p class="muted">No free times this month.</p>{{end}}
+</div>
+</div>
+{{end}}

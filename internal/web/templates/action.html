@@ -1,0 +1,10 @@
+{{define "title"}}{{if eq .T.Action "confirm"}}Confirm{{else}}Reject{{end}} booking{{end}}
+{{define "content"}}
+{{$b := .T.Booking}}
+<h1>{{if eq .T.Action "confirm"}}Confirm{{else}}Reject{{end}} this booking?</h1>
+<div class="card">{{.ET.Title}} · {{datetime $b.Start .Host.TimeZone}} ({{.Host.TimeZone}}) · {{$b.Booker.Name}} &lt;{{$b.Booker.Email}}&gt; {{template "status" $b.Status}}</div>
+<form method="post" action="/action/{{.Token}}">
+  {{if eq .T.Action "reject"}}<label for="reason">Reason (optional)</label><input id="reason" name="reason">{{end}}
+  <p><button {{if eq .T.Action "reject"}}class="danger"{{end}}>{{if eq .T.Action "confirm"}}Confirm{{else}}Reject{{end}}</button></p>
+</form>
+{{end}}

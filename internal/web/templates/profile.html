@@ -1,0 +1,15 @@
+{{define "title"}}Profile{{end}}
+{{define "content"}}
+<h1>Profile</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="/app/profile">
+  <label for="name">Name</label><input id="name" name="name" required value="{{.User.Name}}">
+  <label for="bio">Bio</label><textarea id="bio" name="bio">{{.User.Bio}}</textarea>
+  <label for="avatar_url">Avatar URL</label><input id="avatar_url" name="avatar_url" type="url" value="{{.User.AvatarURL}}">
+  <label for="time_zone">Time zone</label>
+  <select id="time_zone" name="time_zone">{{$tz := .User.TimeZone}}{{if not (has .Zones $tz)}}<option selected>{{$tz}}</option>{{end}}{{range .Zones}}<option {{if eq . $tz}}selected{{end}}>{{.}}</option>{{end}}</select>
+  <label for="week_start">Week starts on</label>
+  <select id="week_start" name="week_start"><option value="monday" {{if eq .User.WeekStart "monday"}}selected{{end}}>Monday</option><option value="sunday" {{if eq .User.WeekStart "sunday"}}selected{{end}}>Sunday</option></select>
+  <p><button>Save</button></p>
+</form>
+{{end}}

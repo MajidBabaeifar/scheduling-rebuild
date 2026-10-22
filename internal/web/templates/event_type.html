@@ -1,0 +1,74 @@
+{{define "title"}}Event type{{end}}
+{{define "content"}}
+{{$et := .ET}}
+<h1>{{if $et.ID}}Edit {{$et.Title}}{{else}}New event type{{end}}</h1>
+{{with .Error}}<p class="error" role="alert">{{.}}</p>{{end}}
+<form method="post" action="{{if $et.ID}}/app/event-types/{{$et.ID}}{{else}}/app/event-types{{end}}">
+<fieldset><legend>Basics</legend>
+  <label for="title">Title</label><input id="title" name="title" required maxlength="200" value="{{$et.Title}}">
+  <label for="slug">Slug</label><input id="slug" name="slug" required pattern="[a-z0-9\-]{1,64}" value="{{$et.Slug}}">
+  <label for="description">Description</label><textarea id="description" name="description">{{$et.Description}}</textarea>
+  <div class="grid2">
+  <div><label for="length">Length (min)</label><input id="length" name="length" type="number" min="1" value="{{$et.Length}}"></div>
+  <div><label for="durations">Other durations (comma list incl. length)</label><input id="durations" name="durations" value="{{ints $et.Durations}}"></div>
+  <div><label for="position">Position</label><input id="position" name="position" type="number" value="{{$et.Position}}"></div>
+  <div><label for="schedule_id">Schedule</label><select id="schedule_id" name="schedule_id"><option value="0">My default</option>{{$sid := optID $et.ScheduleID}}{{range .Schedules}}<option value="{{.ID}}" {{if eq .ID $sid}}selected{{end}}>{{.Name}}</option>{{end}}</select></div>
+  </div>
+  <label><input type="checkbox" name="hidden" {{if $et.Hidden}}checked{{end}}> Hidden from profile (bookable by link)</label>
+</fieldset>
+<fieldset><legend>When</legend>
+  <div class="grid2">
+  <div><label for="slot_interval">Slot interval (min, blank = duration)</label><input id="slot_interval" name="slot_interval" type="number" min="1" value="{{if $et.SlotInterval}}{{$et.SlotInterval}}{{end}}"></div>
+  <div><label for="min_notice">Minimum notice (min)</label><input id="min_notice" name="min_notice" type="number" min="0" value="{{$et.MinNotice}}"></div>
+  <div><label for="buffer_before">Buffer before (min)</label><input id="buffer_before" name="buffer_before" type="number" min="0" value="{{$et.BufferBefore}}"></div>
+  <div><label for="buffer_after">Buffer after (min)</label><input id="buffer_after" name="buffer_after" type="number" min="0" value="{{$et.BufferAfter}}"></div>
+  </div>
+  <label for="window_kind">Booking window</label>
+  <select id="window_kind" name="window_kind">{{$k := $et.Window.Kind}}
+    <option value="unlimited" {{if eq $k "unlimited"}}selected{{end}}>Unlimited</option>
+    <option value="rolling" {{if eq $k "rolling"}}selected{{end}}>Rolling: N days ahead</option>
+    <option value="rolling_available" {{if eq $k "rolling_available"}}selected{{end}}>Rolling: N available days</option>
+    <option value="range" {{if eq $k "range"}}selected{{end}}>Date range</option></select>
+  <div class="grid2">
+  <div><label for="window_days">Days</label><input id="window_days" name="window_days" type="number" min="1" value="{{if $et.Window.Days}}{{$et.Window.Days}}{{end}}"></div>
+  <div><label><input type="checkbox" name="window_calendar_days" {{if $et.Window.CalendarDays}}checked{{end}}> Calendar days (else business days)</label></div>
+  <div><label for="window_start">Range start</label><input id="window_start" name="window_start" type="date" value="{{$et.Window.StartDate}}"></div>
+  <div><label for="window_end">Range end</label><input id="window_end" name="window_end" type="date" value="{{$et.Window.EndDate}}"></div>
+  </div>
+</fieldset>
+<fieldset><legend>Limits (blank = none)</legend>
+  <div class="grid2">
+  <div><label for="lb_day">Bookings / day</label><input id="lb_day" name="lb_day" type="number" min="1" value="{{opt $et.Limits.Bookings.Day}}"></div>
+  <div><label for="lb_week">Bookings / week</label><input id="lb_week" name="lb_week" type="number" min="1" value="{{opt $et.Limits.Bookings.Week}}"></div>
+  <div><label for="lb_month">Bookings / month</label><input id="lb_month" name="lb_month" type="number" min="1" value="{{opt $et.Limits.Bookings.Month}}"></div>
+  <div><label for="lb_year">Bookings / year</label><input id="lb_year" name="lb_year" type="number" min="1" value="{{opt $et.Limits.Bookings.Year}}"></div>
+  <div><label for="lm_day">Minutes / day</label><input id="lm_day" name="lm_day" type="number" min="1" value="{{opt $et.Limits.Minutes.Day}}"></div>
+  <div><label for="lm_week">Minutes / week</label><input id="lm_week" name="lm_week" type="number" min="1" value="{{opt $et.Limits.Minutes.Week}}"></div>
+  <div><label for="lm_month">Minutes / month</label><input id="lm_month" name="lm_month" type="number" min="1" value="{{opt $et.Limits.Minutes.Month}}"></div>
+  <div><label for="lm_year">Minutes / year</label><input id="lm_year" name="lm_year" type="number" min="1" value="{{opt $et.Limits.Minutes.Year}}"></div>
+  </div>
+</fieldset>
+<fieldset><legend>Confirmation</legend>
+  <label><input type="checkbox" name="requires_confirmation" {{if $et.RequiresConfirmation}}checked{{end}}> Requires confirmation</label>
+  <div class="row"><label for="confirm_within_value">…only when the booking starts within</label>
+    <input id="confirm_within_value" name="confirm_within_value" type="number" min="1" style="width:6rem" value="{{with $et.ConfirmWithin}}{{.Value}}{{end}}">
+    <select name="confirm_within_unit" aria-label="Unit" style="width:8rem">{{$unit := ""}}{{with $et.ConfirmWithin}}{{$unit = .Unit}}{{end}}<option value="hours" {{if eq $unit "hours"}}selected{{end}}>hours</option><option value="minutes" {{if eq $unit "minutes"}}selected{{end}}>minutes</option></select></div>
+  <label><input type="checkbox" name="pending_blocks_slot" {{if $et.PendingBlocksSlot}}checked{{end}}> Pending bookings block my time</label>
+</fieldset>
+<fieldset><legend>Cancel and reschedule</legend>
+  <label><input type="checkbox" name="allow_cancel" {{if $et.AllowCancel}}checked{{end}}> Bookers may cancel</label>
+  <label><input type="checkbox" name="allow_reschedule" {{if $et.AllowReschedule}}checked{{end}}> Bookers may reschedule</label>
+  <label for="min_reschedule_notice">Minimum reschedule notice (min)</label><input id="min_reschedule_notice" name="min_reschedule_notice" type="number" min="0" value="{{$et.MinRescheduleNotice}}">
+  <label for="cancel_reason">Cancellation reason</label>
+  <select id="cancel_reason" name="cancel_reason">{{$cr := $et.CancelReason}}{{range $v := (list "required_host" "required_booker" "required_both" "optional")}}<option {{if eq $v $cr}}selected{{end}}>{{$v}}</option>{{end}}</select>
+</fieldset>
+<fieldset><legend>Where and what to ask</legend>
+  <label for="locations">Locations, one per line: <code>kind value</code> (in_person, link, phone_host, phone_booker, video)</label>
+  <textarea id="locations" name="locations">{{locations $et.Locations}}</textarea>
+  <label for="booking_fields">Booking fields (JSON list of <code>{name, type, label, required, hidden, options, min_length, max_length}</code>; <code>"system": true</code> to hide phone/notes/guests/location)</label>
+  <textarea id="booking_fields" name="booking_fields" rows="8">{{if .Fields}}{{jsonIndent .Fields}}{{end}}</textarea>
+</fieldset>
+<p><button>Save</button> <a href="/app">Back</a></p>
+</form>
+{{if $et.ID}}<form method="post" action="/app/event-types/{{$et.ID}}/delete"><button class="danger">Delete</button></form>{{end}}
+{{end}}
