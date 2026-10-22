@@ -335,6 +335,18 @@ func TestBKG_11(t *testing.T) {
 	if d := e.mail.find("Declined:"); d == nil || !strings.Contains(d.Body, "fully booked") {
 		t.Fatal("declined email")
 	}
+
+	// Confirming past a reached limit (SLT-13) → limit_reached: pending bookings don't count, so two can wait for one place.
+	lim := e.event(t, ann, func(et *EventType) { et.Slug, et.RequiresConfirmation, et.Limits.Bookings.Day = "lim", true, ptr(1) })
+	p1 := e.mustBook(t, lim, "2026-11-04T10:00:00Z", "p@x.com")
+	p2 := e.mustBook(t, lim, "2026-11-04T11:00:00Z", "q@x.com")
+	if err := e.ConfirmBooking(ctx, ann.ID, p1.UID); err != nil {
+		t.Fatal(err)
+	}
+	wantCode(t, e.ConfirmBooking(ctx, ann.ID, p2.UID), ErrLimitReached)
+	if got, _ := e.Booking(ctx, p2.UID); got.Status != StatusPending {
+		t.Fatalf("still pending: %s", got.Status)
+	}
 }
 
 // BKG-12: reschedule → old cancelled, new links back; sequence + 1, same calendar UID, paid carried.

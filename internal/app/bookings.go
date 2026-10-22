@@ -503,6 +503,19 @@ func (a *App) decide(ctx context.Context, b *Booking, action, reason string) err
 	if action == "reject" {
 		to = StatusRejected
 	}
+	if to == StatusAccepted { // BKG-11: confirming past a reached limit (SLT-13) → limit_reached
+		e, err := a.newEngine(ctx, tx, b.EventTypeID, "UTC", 0, b.UID, "")
+		if err != nil {
+			return err
+		}
+		e.duration = b.End.Sub(b.Start)
+		if ok, err := e.underLimits(b.Start); err != nil || !ok {
+			if err != nil {
+				return err
+			}
+			return &Error{Code: ErrLimitReached}
+		}
+	}
 	if err := setStatus(ctx, tx, b, to); err != nil { // F-28: confirming onto an accepted exact slot → slot_taken
 		return err
 	}
