@@ -278,4 +278,12 @@ func TestSLT_18(t *testing.T) {
 	if got := m.Dates(); !reflect.DeepEqual(got, []string{"2026-11-03"}) {
 		t.Fatalf("%v", got)
 	}
+	// [from, to): a slot starting at `to` is left out; dates without slots have no key.
+	m, err = e.Slots(ctx, SlotQuery{EventTypeID: et.ID, From: at("2026-10-31T00:00:00Z"), To: at("2026-11-02T10:00:00Z"), TimeZone: "UTC"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := m.Dates(); !reflect.DeepEqual(got, []string{"2026-11-02"}) || len(m["2026-11-02"]) != 2 {
+		t.Fatalf("%v %v", got, m["2026-11-02"])
+	}
 }
