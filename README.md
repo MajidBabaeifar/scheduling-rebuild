@@ -1,5 +1,5 @@
 ---
-implements: "@spechub/scheduling@0.1.0"
+implements: "@specfork/scheduling@0.2.0"
 stack: [go, sqlite, htmx]
 ---
 
