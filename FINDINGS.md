@@ -2,7 +2,7 @@
 
 Spec gaps met while building `@spechub/scheduling@0.1.0` (+ `@spechub/auth`) from the spec alone.
 Kind: **C** contradiction, **M** missing, **A** ambiguous, **T** wrong `Verified by`.
-Code cites `F-n` where the assumption lives. ★ = proposed as a spec fix on SpecHub branch `fix/scheduling-rebuild-findings`.
+Code cites `F-n` where the assumption lives. ★ = proposed as a spec fix on SpecHub branch `fix/scheduling-rebuild-findings` (merged to SpecHub `main` at `01de4c7`, vendored in `specs/upstream/`). ✔ = resolved upstream in review.
 
 | # | Req | Kind | Problem | Assumed here |
 |---|---|---|---|---|
@@ -36,7 +36,7 @@ Code cites `F-n` where the assumption lives. ★ = proposed as a spec fix on Spe
 | F-28 ★ | BKG-7, BKG-11 | M | Confirming a pending booking whose exact slot is already accepted. | Refused `slot_taken`; overlapping (not exact) is the organizer's call. |
 | F-29 ★ | EVT-16, BKG-13, BKG-15 | A | Do `allow_cancel` / `allow_reschedule` bind the organizer too? | Bookers only. |
 | F-30 ★ | BKG-12 | M | What carries over on reschedule; may the booker edit answers? Old booking is cancelled even if the new one ends up pending/rejected. | Attendees, responses, location, duration carry over unchanged; old cancelled at once, as written. |
-| F-31 | BKG-4 | A | "Emails valid" undefined (RFC 5322 accepts `a@b`). | addr-spec with a dotted domain. |
+| F-31 ✔ | BKG-4 | A | "Emails valid" undefined (RFC 5322 accepts `a@b`). | addr-spec with a dotted domain. Resolved upstream: BKG-4 now says so. |
 | F-32 ★ | AUTH-13, PUB | M | No CSRF rule for cookie-authenticated form posts. | SameSite=Lax plus an Origin check on POST. |
 | F-33 ★ | PUB-2 | M | Zone "changeable unless locked": no event-type field locks the zone. | Not built. |
 | F-34 ★ | SLT-8 | A | "Host is attendee" matched how? | Attendee email = host's account email. |
@@ -44,6 +44,6 @@ Code cites `F-n` where the assumption lives. ★ = proposed as a spec fix on Spe
 | F-36 | AUTH-5, PUB-1 | M | Unverified users can't publish pages (AUTH-5), so PUB depends on AUTH-5, which the v0.1 scope left out. | Pages publish without verification in this build. |
 | F-37 ★ | SLT-4, SLT-9 | A | "Range start" before or after busy time (and buffers) is removed; this moves slot alignment after a booking. | Free ranges are hours minus busy expanded by both sides' buffers (equivalent to SLT-9), so alignment restarts after each busy block. |
 | F-38 ★ | BKG-13 | A | "In the past": started or ended? | Started. |
-| F-39 | SLT-13 | A | Limits count only accepted bookings, so several pending ones can exceed a limit once confirmed. | As written. |
-| F-40 | EVT-1 | A | `position` order direction; no upper bound on `length`. | Ascending, ties by id; no bound. |
+| F-39 ✔ | SLT-13 | A | Limits count only accepted bookings, so several pending ones can exceed a limit once confirmed. | Resolved upstream: BKG-11 refuses confirming past a reached limit (`limit_reached`). |
+| F-40 ✔ | EVT-1 | A | `position` order direction; no upper bound on `length`. | Resolved upstream: `length` 1–1440, `position` ascending, ties by creation. |
 | F-41 | AUTH-13 | A | "Next request 401" for an HTML app. | 401 status with the sign-in form. |
