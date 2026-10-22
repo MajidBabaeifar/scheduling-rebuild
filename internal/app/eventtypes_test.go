@@ -162,6 +162,17 @@ func TestEVT_7(t *testing.T) {
 	if got := query(avail).Dates(); !reflect.DeepEqual(got, []string{"2026-10-23", "2026-10-27", "2026-10-28"}) {
 		t.Fatalf("rolling_available: %v", got)
 	}
+	// Fewer than `days` qualifying dates within 61 days → the window ends at today + 61 (2026-12-23).
+	sparse, _ := e.CreateSchedule(ctx, u.ID, Schedule{Name: "sparse", Overrides: []Override{
+		{Date: "2026-10-28", Start: "09:00", End: "10:00"}, {Date: "2026-12-20", Start: "09:00", End: "10:00"}, {Date: "2026-12-26", Start: "09:00", End: "10:00"},
+	}})
+	few := e.event(t, u, func(et *EventType) {
+		et.Slug, et.ScheduleID, et.Window = "few", &sparse, Window{Kind: "rolling_available", Days: 3}
+	})
+	m, err := e.Slots(ctx, SlotQuery{EventTypeID: few.ID, From: at("2026-12-01T00:00:00Z"), To: at("2026-12-31T00:00:00Z"), TimeZone: "UTC"})
+	if err != nil || !reflect.DeepEqual(m.Dates(), []string{"2026-12-20"}) {
+		t.Fatalf("rolling_available fallback: %v %v", m.Dates(), err)
+	}
 	wantCode(t, e.tryEvent(u, func(et *EventType) {
 		et.Slug, et.Window = "w", Window{Kind: "range", StartDate: "2026-10-27", EndDate: "2026-10-26"}
 	}), ErrInvalid)
